@@ -12,10 +12,15 @@
 
 #include "get_next_line.h"
 
-static void	ft_read(int fd, char *buf, char **str)
+static void	ft_free(char **str)
+{
+	free(*str);
+	*str = NULL;
+}
+
+static void	ft_read(int fd, char *buf, char **str, ssize_t i)
 {
 	char	*tmp;
-	ssize_t	i;
 
 	if (!*str || !ft_strchr(*str, '\n'))
 	{
@@ -36,18 +41,14 @@ static void	ft_read(int fd, char *buf, char **str)
 			i = read(fd, buf, BUFFER_SIZE);
 		}
 	}
+	if (i == -1)
+		ft_free(*&str);
 	free(buf);
-}
-
-static void	ft_free(char **str)
-{
-	free(*str);
-	*str = NULL;
 }
 
 static char	*ft_finish(char **str)
 {
-	char	*rja3;
+	char	*ret;
 	char	*tmp;
 	int		i;
 	int		j;
@@ -56,36 +57,35 @@ static char	*ft_finish(char **str)
 		return (NULL);
 	if (!ft_strchr(*str, '\n'))
 	{
-		rja3 = ft_substr(*str, 0, ft_strlen(*str));
+		ret = ft_substr(*str, 0, ft_strlen(*str));
 		ft_free(*&str);
-		return (rja3);
+		return (ret);
 	}
 	i = ft_strlen(*str);
 	j = ft_strlen(ft_strchr(*str, '\n'));
-	rja3 = ft_substr(*str, 0, i - j + 1);
+	ret = ft_substr(*str, 0, i - j + 1);
 	tmp = *str;
 	*str = ft_substr(ft_strchr(*str, '\n'), 1, j - 1);
+	if (!*str)
+		return (NULL);
 	free(tmp);
 	if (**str == '\0')
 		ft_free(*&str);
-	return (rja3);
+	return (ret);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*str;
 	char		*buf;
+	ssize_t		i;
 
-	if (BUFFER_SIZE < 1 || BUFFER_SIZE > 4294967295)
+	i = 0;
+	if (fd < 0 || BUFFER_SIZE < 1 || BUFFER_SIZE > 2147483647)
 		return (NULL);
-	buf = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	buf = malloc(((size_t)BUFFER_SIZE + 1) * sizeof(char));
 	if (!buf)
 		return (NULL);
-	if (fd == -1)
-	{
-		free(buf);
-		return (NULL);
-	}
-	ft_read(fd, buf, &str);
+	ft_read(fd, buf, &str, i);
 	return (ft_finish(&str));
 }
