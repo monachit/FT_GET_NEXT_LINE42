@@ -81,7 +81,7 @@ char	*get_next_line(int fd)
 	ssize_t		i;
 
 	i = 0;
-	if (fd < 0 || BUFFER_SIZE < 1 || BUFFER_SIZE > 2147483647)
+	if (fd < 0 || BUFFER_SIZE < 1)
 		return (NULL);
 	buf = malloc(((size_t)BUFFER_SIZE + 1) * sizeof(char));
 	if (!buf)
